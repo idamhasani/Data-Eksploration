@@ -1,0 +1,62 @@
+---
+title: "Analisis Komponen Utama"
+author: "Idam A. Hasani"
+date: "23/11/2022"
+output: word_document
+---
+
+```{r}
+library(readxl)
+per5 <- read_excel ("D:/1. LECTURE/SEMESTER 7/SKRIPSI/Data SUR.xlsx")
+datapca <- per5[,2:10]
+nama <- per5[,1]
+```
+
+```{r}
+#uji normal multivariat
+library(mvnTest)
+HZ.test(datapca)
+```
+
+```{r}
+#Matriks dekomposisi
+svd(datapca)
+```
+
+```{r}
+idampca <- prcomp(datapca)
+summary(idampca)
+```
+
+```{r}
+idampca$rotation
+plot(idampca)
+biplot(idampca, cex=0.6, xlab="PC1", ylab="PC2")
+
+```
+
+```{r}
+g12  <- idampca$x[,1:2]
+grup <- as.data.frame(g12)
+grup[,3] <- ifelse((grup[,1]>0 & grup[,2]>0), 1,
+                   ifelse((grup[,1] > 0 & grup[,2] < 0), 2,
+                          ifelse((grup[,1] < 0 & grup[,2] > 0), 3,
+                                 ifelse((grup[,1] < 0 & grup[,2] > 0), 4, 0))))
+
+colnames(grup) <- c("PC1", "PC2", "Group")
+grup
+```
+
+```{r}
+#Hasil pengelompokkan kemiskinan
+library(dplyr)
+data_result <- per5%>%
+  mutate(Kelompok = grup$Group) %>%
+  arrange(Kelompok)
+
+Hasil <- data_result%>%
+  select(Provinsi, Kelompok) %>%
+  arrange(Kelompok)
+Hasil
+```
+
